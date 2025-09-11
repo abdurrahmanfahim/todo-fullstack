@@ -1,0 +1,20 @@
+{
+  "github.copilot.enable": {
+    "*": false
+  },
+  "amazonQ.codewhisperer.shareCodeWhispererContentWithAWS": false,
+  "amazonQ.codewhisperer.includeSuggestionsWithCodeReferences": false,
+  "editor.inlineSuggest.enabled": false,
+  "editor.quickSuggestions": {
+    "other": false,
+    "comments": false,
+    "strings": false
+  },
+  "editor.suggestOnTriggerCharacters": false,
+  "editor.acceptSuggestionOnEnter": "off",
+  "editor.tabCompletion": "off",
+  "editor.wordBasedSuggestions": "off",
+  "editor.parameterHints.enabled": false,
+  "typescript.suggest.enabled": false,
+  "javascript.suggest.enabled": false
+}
