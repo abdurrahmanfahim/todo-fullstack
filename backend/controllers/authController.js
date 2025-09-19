@@ -51,7 +51,7 @@ const registrationController = async (req, res) => {
       process.env.JWT_ACCESS_SECRET,
       { expiresIn: "1d" }
     );
-    const verifyLink = `${process.env.CLIENT_URL}/api/auth/verify/${verificationToken}`;
+    const verifyLink = `${process.env.SERVER_URL}/api/auth/verify/${verificationToken}`;
 
     await transporter.sendMail({
       from: process.env.USER_EMAIL,

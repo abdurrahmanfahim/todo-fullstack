@@ -9,8 +9,8 @@ const registrationValidator = (req, res, next) => {
     if (username.length < 3) {
       errors.username = "username must be at least 3 characters"
     }
-    if (username.length > 15) {
-      errors.username = "username must be less than 15 characters"
+    if (username.length > 20) {
+      errors.username = "username must be less than 20 characters"
     }
   } else {
     errors.username = "username is required"
@@ -36,7 +36,7 @@ const registrationValidator = (req, res, next) => {
   }
 
   if (errors.username || errors.email || errors.password) {
-    res.send({error: errors})
+    res.send({ error: errors })
   } else {
     next()
   }
