@@ -1,0 +1,20 @@
+{
+  "name": "todo-fullstack",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abdurrahmanfahim/todo-fullstack.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/abdurrahmanfahim/todo-fullstack/issues"
+  },
+  "homepage": "https://github.com/abdurrahmanfahim/todo-fullstack#readme",
+  "description": ""
+}
