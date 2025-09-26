@@ -7,12 +7,9 @@ const Login = () => {
     email: "",
     password: "",
   });
-  
 
   const dispatch = useDispatch();
   const { message, error, loading } = useSelector((state) => state.auth);
-
-
 
   return (
     <div>

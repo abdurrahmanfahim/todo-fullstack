@@ -3,12 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { forgotPassword } from "../features/auth/authSlice";
 
 const ForgotPassword = () => {
-
-    const [form, setForm] = useState({
-    email: ""
+  const [form, setForm] = useState({
+    email: "",
   });
-
-
 
   const dispatch = useDispatch();
   const { message, error, loading } = useSelector((state) => state.auth);
@@ -24,15 +21,14 @@ const ForgotPassword = () => {
       <br />
       <br />
 
-        <button
-          className="border border-blue-500 rounded-md p-2 bg-blue-500"
-          onClick={() => dispatch(forgotPassword(form))}
-        >
-          Submit
-        </button>
-      
+      <button
+        className="border border-blue-500 rounded-md p-2 bg-blue-500"
+        onClick={() => dispatch(forgotPassword(form))}
+      >
+        Submit
+      </button>
     </div>
   );
-}
+};
 
-export default ForgotPassword
+export default ForgotPassword;

@@ -1,14 +1,21 @@
-import axios from "axios";
-import { useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Registration from "./pages/Registration";
+import Login from "./pages/Login";
+import VerifyEmail from "./pages/VerifyEmail";
+import ResetPassword from "./pages/ResetPassword";
+import ForgotPassword from "./pages/ForgotPassword";
 
 function App() {
-  useEffect(() => {
-    axios.get("https://jsonplaceholder.typicode.com/users").then((data) => {});
-  });
   return (
-    <>
-      <h1>hello devs</h1>
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Registration />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/verify/:token" element={<VerifyEmail />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

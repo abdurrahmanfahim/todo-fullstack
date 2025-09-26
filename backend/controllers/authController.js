@@ -2,12 +2,22 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User = require("../models/userModel");
 const nodemailer = require("nodemailer");
+const Queue = require("bull");
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: process.env.USER_EMAIL,
     pass: process.env.USER_PASSWORD,
+  },
+});
+
+const emailQueue = new Queue("emails", {
+  redis: {
+    host: "redis-13571.c1.ap-southeast-1-1.ec2.redns.redis-cloud.com:13571",
+    port: 13571,
+    username: 'default',
+    password: 'af3z4MAE8RB338xaa0quYCB52otMmvLj'
   },
 });
 
@@ -22,7 +32,6 @@ const generateRefreshToken = (user) => {
     expiresIn: "365d",
   });
 };
-
 
 // new ========= registration controller =========
 const registrationController = async (req, res) => {
@@ -46,21 +55,17 @@ const registrationController = async (req, res) => {
   try {
     await user.save();
 
-    const verificationToken = jwt.sign(
-      { id: user._id },
-      process.env.JWT_ACCESS_SECRET,
-      { expiresIn: "1d" }
+    await emailQueue.add(
+      "verifyEmail",
+      { email: user.email },
+      {
+        attempts: 5,
+        backoff: 5000,
+        removeOnComplete: true, // automatically remove ( success job )
+      }
     );
-    const verifyLink = `${process.env.SERVER_URL}/api/auth/verify/${verificationToken}`;
 
-    await transporter.sendMail({
-      from: process.env.USER_EMAIL,
-      to: user.email,
-      subject: `Dear ${user.username}, Please Verify Your Email.`,
-      html: `<h3>Please Verify Your Email</h3> <br> <a href="${verifyLink}">Click to Verify</a> `,
-    });
-
-    res.send({ massage: "registration successful, please check your email" });
+    res.send({ massage: "Registration successful, please check your email" });
   } catch (error) {
     res.send({ error: error });
   }
@@ -68,7 +73,7 @@ const registrationController = async (req, res) => {
 
 // new ========= email verification controller =========
 const emailVerificationController = async (req, res) => {
-  const {token} = req.params;
+  const { token } = req.params;
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
@@ -87,8 +92,7 @@ const emailVerificationController = async (req, res) => {
   }
 };
 
-
-// new ========= login controller ========= 
+// new ========= login controller =========
 const loginController = async (req, res) => {
   const { email, password } = req.body;
 
@@ -135,7 +139,6 @@ const loginController = async (req, res) => {
   }
 };
 
-
 //  new ========= refresh token controller =========
 const refreshTokenController = async (req, res) => {
   const token = req.cookies?.refreshToken;
@@ -164,13 +167,12 @@ const refreshTokenController = async (req, res) => {
   }
 };
 
-
 // new ========= forgotten password controller =========
 const forgotPasswordController = async (req, res) => {
-  const email = req.body?.email
+  const email = req.body?.email;
 
   if (!email) {
-    return res.send({error: "Please Enter Your Email"})
+    return res.send({ error: "Please Enter Your Email" });
   }
   const userExist = await User.findOne({ email: email });
   if (!userExist) {
@@ -184,7 +186,7 @@ const forgotPasswordController = async (req, res) => {
       { expiresIn: "15m" }
     );
 
-    const resetLink = `${process.env.CLIENT_URL}/api/auth/reset-password/${resetToken}`;
+    const resetLink = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
     await transporter.sendMail({
       from: process.env.USER_EMAIL,
@@ -200,27 +202,47 @@ const forgotPasswordController = async (req, res) => {
   }
 };
 
-
 // new ========= reset password controller =========
 const resetPasswordController = async (req, res) => {
-  const { token } = req.params
-  const { password } = req.body
-  
+  const { token } = req.params;
+  const { password } = req.body;
+
   try {
-    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET)
-    const userExist = await User.findById(decoded.id)
+    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+    const userExist = await User.findById(decoded.id);
 
     if (!userExist) {
-      return res.send({error: "Invalid token"})
+      return res.send({ error: "Invalid token" });
     }
 
-    userExist.password = await bcrypt.hash(password, 10)
-    await userExist.save()
-    res.send({massage: "Password Reset Successfully"})
+    userExist.password = await bcrypt.hash(password, 10);
+    await userExist.save();
+    res.send({ massage: "Password Reset Successfully" });
   } catch (error) {
-    res.send({error: "Invalid token or Expired"})
+    res.send({ error: "Invalid token or Expired" });
   }
 };
+
+emailQueue.process("verifyEmail", async (job) => {
+  try {
+    const verificationToken = jwt.sign(
+      { id: user._id },
+      process.env.JWT_ACCESS_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    const verifyLink = `${process.env.CLIENT_URL}/verify/${verificationToken}`;
+
+    await transporter.sendMail({
+      from: process.env.USER_EMAIL,
+      to: user.email,
+      subject: `Dear ${user.username}, Please Verify Your Email.`,
+      html: `<h3>Please Verify Your Email</h3> <br> <a href="${verifyLink}">Click to Verify</a> `,
+    });
+  } catch (error) {
+    console.log("email failed", error);
+  }
+});
 
 module.exports = {
   registrationController,
